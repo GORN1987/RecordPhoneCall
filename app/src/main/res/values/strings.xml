@@ -1,0 +1,17 @@
+<resources>
+    <string name="app_name">Record Phone Call</string>
+    <string name="btnLogin">Login</string>
+    <string name="title_activity_summary">Last Activities</string>
+    <string name="record_speacher_alert_error">Sync Error</string>
+    <string name="record_speacher_alert_sucess">Sync Success</string>
+    <string name="record_speacher_alert_error_msg">One connection  error happened </string>
+    <string name="record_speacher_alert_sucess_msg">Audio was sent succefully</string>
+
+    <string name="yes">yes</string>
+    <string name="no">no</string>
+
+
+    <string name="question_delete_record">Do you want delete this record?</string>
+
+    <string name="confirmation">Confirmation?</string>
+</resources>
