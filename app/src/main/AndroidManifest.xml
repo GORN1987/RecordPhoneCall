@@ -51,15 +51,19 @@
         <receiver
             android:name=".InitiateQueue"
             android:enabled="true"
+            android:process=":remote"
+            android:permission="android.permission.WRITE_EXTERNAL_STORAGE"
             android:exported="true" />
         <receiver
             android:name=".VerifyQueueReceiver"
             android:enabled="true"
             android:exported="true" />
 
+
         <service
             android:name=".VerifyQueue"
-            android:exported="false" />
+            android:permission="android.permission.BIND_JOB_SERVICE"
+            android:exported="false"/>
 
     </application>
 

@@ -12,6 +12,6 @@
 
 
     <string name="question_delete_record">Do you want delete this record?</string>
-
+    <string name="file_not_load">Error on load file</string>
     <string name="confirmation">Confirmation?</string>
 </resources>

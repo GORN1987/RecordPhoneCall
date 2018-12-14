@@ -1,24 +1,18 @@
 package com.guilherme.recordphonecall;
 
-import android.app.Dialog;
-import android.app.ProgressDialog;
-import android.content.ContentValues;
 import android.content.Context;
 import android.content.DialogInterface;
 import android.content.Intent;
 import android.database.Cursor;
 import android.database.sqlite.SQLiteDatabase;
-import android.media.AudioManager;
 import android.media.MediaPlayer;
 import android.os.Bundle;
 import android.os.Handler;
 import android.os.Looper;
-import android.support.design.widget.FloatingActionButton;
-import android.support.design.widget.Snackbar;
+import android.support.constraint.Group;
 import android.support.v7.app.AlertDialog;
 import android.support.v7.app.AppCompatActivity;
 import android.support.v7.widget.Toolbar;
-import android.util.Log;
 import android.view.ContextMenu;
 import android.view.Menu;
 import android.view.MenuInflater;
@@ -29,36 +23,23 @@ import android.widget.Button;
 import android.widget.LinearLayout;
 import android.widget.ListView;
 import android.widget.PopupMenu;
-import android.widget.ProgressBar;
 import android.widget.SeekBar;
 import android.widget.Toast;
 
 import com.guilherme.recordphonecall.DBEntities.Record;
 import com.guilherme.recordphonecall.DBEntities.SyncToken;
 
-import java.io.Console;
-import java.io.File;
 import java.io.IOException;
 import java.util.ArrayList;
-import java.util.Calendar;
-import java.util.List;
 import java.util.Observable;
 import java.util.Observer;
 
-import static android.support.v4.content.ContextCompat.startActivity;
-
-public class SummaryActivity extends AppCompatActivity implements Observer, MediaPlayer.OnPreparedListener {
+public class SummaryActivity extends AppCompatActivity implements Observer {
 
 
     public final Context _self = this;
+    final MediaPlayer _mediaPlayer = new MediaPlayer();
     private boolean _sync = false;
-    final MediaPlayer mediaPlayer = new MediaPlayer();
-
-    @Override
-    public void onPrepared(MediaPlayer mediaPlayer) {
-
-    }
-
 
 
     public void PopulateList(Boolean sync) {
@@ -110,6 +91,17 @@ public class SummaryActivity extends AppCompatActivity implements Observer, Medi
         Toolbar toolbar = (Toolbar) findViewById(R.id.toolbar);
         setSupportActionBar(toolbar);
         BroadcastObserver.getIntance().addObserver(this);
+        _sync = false;
+        if (savedInstanceState != null)
+        {
+            if (savedInstanceState.getBoolean("selectedSync"))
+            {
+                _sync = true;
+
+            }
+
+        }
+
 
         PopulateList(_sync);
 
@@ -117,21 +109,30 @@ public class SummaryActivity extends AppCompatActivity implements Observer, Medi
     }
 
     @Override
+    protected void onSaveInstanceState(Bundle outState) {
+
+        outState.putBoolean("selectedSync", _sync);
+        super.onSaveInstanceState(outState);
+    }
+
+    @Override
     public boolean onCreateOptionsMenu(Menu menu) {
 
         getMenuInflater().inflate(R.menu.summary_menu, menu);
-        menu.findItem(R.id.menuNoSync).setChecked(true);
+        menu.findItem(R.id.menuSync).setChecked(_sync);
         return super.onCreateOptionsMenu(menu);
     }
 
     @Override
     public boolean onOptionsItemSelected(MenuItem item) {
         if (item.getItemId() == R.id.menuSync) {
+            _sync = true;
             PopulateList(true);
             item.setChecked(true);
 
 
         } else if (item.getItemId() == R.id.menuNoSync) {
+            _sync = false;
             PopulateList(false);
             item.setChecked(true);
 
@@ -165,8 +166,8 @@ public class SummaryActivity extends AppCompatActivity implements Observer, Medi
         }
         return super.onOptionsItemSelected(item);
     }
-    private void ResumeMediaProgress()
-    {
+
+    private void ResumeMediaProgress() {
         new Thread(new Runnable() {
 
             @Override
@@ -174,7 +175,7 @@ public class SummaryActivity extends AppCompatActivity implements Observer, Medi
 
                 Handler handler = new Handler(Looper.getMainLooper());
 
-                while (!mediaPlayer.isPlaying()) {
+                while (!_mediaPlayer.isPlaying()) {
 
                     try {
                         Thread.sleep(100);
@@ -183,19 +184,15 @@ public class SummaryActivity extends AppCompatActivity implements Observer, Medi
                     }
                 }
                 final SeekBar seekBarAudio = findViewById(R.id.seekBarAudio);
-                seekBarAudio.setMax(mediaPlayer.getDuration());
+                seekBarAudio.setMax(_mediaPlayer.getDuration());
 
-                while (mediaPlayer.getCurrentPosition() < mediaPlayer.getDuration()) {
-                    if (!mediaPlayer.isPlaying())
-                    {
-                        return;
-                    }
+                while ((_mediaPlayer.isPlaying()) && (_mediaPlayer.getCurrentPosition() < _mediaPlayer.getDuration())) {
 
                     handler.post(new Runnable() {
                         @Override
                         public void run() {
 
-                            seekBarAudio.setProgress(mediaPlayer.getCurrentPosition());
+                            seekBarAudio.setProgress(_mediaPlayer.getCurrentPosition());
 
                         }
                     });
@@ -224,9 +221,9 @@ public class SummaryActivity extends AppCompatActivity implements Observer, Medi
                     btnAudioController.setBackground(getDrawable(R.drawable.ic_pause_black_24dp));
 
 
-                    while (mediaPlayer.isPlaying())
-                    {
-                        mediaPlayer.stop();
+                    while (_mediaPlayer.isPlaying()) {
+                        _mediaPlayer.stop();
+                        _mediaPlayer.setOnPreparedListener(null);
                         try {
                             Thread.sleep(150);
                         } catch (InterruptedException e) {
@@ -234,7 +231,7 @@ public class SummaryActivity extends AppCompatActivity implements Observer, Medi
                         }
                         btnAudioController.setBackground(getDrawable(R.drawable.ic_pause_black_24dp));
                     }
-                    mediaPlayer.reset();
+                    _mediaPlayer.reset();
                     seekBarAudio.setOnSeekBarChangeListener(new SeekBar.OnSeekBarChangeListener() {
                         @Override
                         public void onProgressChanged(SeekBar seekBar, int i, boolean b) {
@@ -248,20 +245,10 @@ public class SummaryActivity extends AppCompatActivity implements Observer, Medi
 
                         @Override
                         public void onStopTrackingTouch(SeekBar seekBar) {
-                            mediaPlayer.seekTo(seekBar.getProgress());
+                            _mediaPlayer.seekTo(seekBar.getProgress());
                         }
                     });
 
-                    audioPainel.getLayoutParams().height = 100;
-                    audioPainel.getParent().requestLayout();
-
-                    mediaPlayer.setOnCompletionListener(new MediaPlayer.OnCompletionListener() {
-                        @Override
-                        public void onCompletion(MediaPlayer mediaPlayer) {
-                            audioPainel.getLayoutParams().height = 0;
-                            audioPainel.getParent().requestLayout();
-                        }
-                    });
 
 
 
@@ -271,13 +258,14 @@ public class SummaryActivity extends AppCompatActivity implements Observer, Medi
                         @Override
                         public void onClick(View view) {
                             btnAudioController.setBackground(getDrawable(R.drawable.ic_play_arrow_black_24dp));
-                            mediaPlayer.pause();
+                            _mediaPlayer.pause();
                             final View.OnClickListener _self = this;
                             View.OnClickListener resumeAction = new View.OnClickListener() {
                                 @Override
                                 public void onClick(View view) {
                                     btnAudioController.setBackground(getDrawable(R.drawable.ic_pause_black_24dp));
-                                    mediaPlayer.start();
+
+                                    _mediaPlayer.start();
                                     btnAudioController.setOnClickListener(_self);
                                     ResumeMediaProgress();
                                 }
@@ -296,21 +284,41 @@ public class SummaryActivity extends AppCompatActivity implements Observer, Medi
                         public void run() {
 
                             try {
-                                mediaPlayer.setDataSource(rec.FILE_NAME);
-                            } catch (IOException e) {
-                                e.printStackTrace();
-                            }
-                            try {
-                                mediaPlayer.prepare();
-                            } catch (IOException e) {
-                                e.printStackTrace();
-                            }
+                                _mediaPlayer.setDataSource(rec.FILE_NAME);
+                                _mediaPlayer.prepareAsync();
+                                _mediaPlayer.setOnPreparedListener(new MediaPlayer.OnPreparedListener() {
+                                    @Override
+                                    public void onPrepared(MediaPlayer mediaPlayer) {
+                                        audioPainel.getLayoutParams().height = 100;
+                                        audioPainel.getParent().requestLayout();
+                                        mediaPlayer.start();
 
-                            if (mediaPlayer.isPlaying()) {
-                                mediaPlayer.stop();
+                                        _mediaPlayer.setOnCompletionListener(new MediaPlayer.OnCompletionListener() {
+                                            @Override
+                                            public void onCompletion(MediaPlayer mediaPlayer) {
+                                                audioPainel.getLayoutParams().height = 0;
+                                                audioPainel.getParent().requestLayout();
+                                            }
+                                        });
+                                    }
+                                });
+
+                                seekBarAudio.setMax(_mediaPlayer.getDuration());
+
+
+                            } catch (IOException e) {
+                                Handler handler = new Handler(getMainLooper());
+                                handler.post(new Runnable() {
+                                    @Override
+                                    public void run() {
+
+                                        Toast.makeText( getApplicationContext(),R.string.file_not_load,Toast.LENGTH_LONG).show();
+
+                                    }
+                                });
+
+
                             }
-                            mediaPlayer.start();
-                            seekBarAudio.setMax(mediaPlayer.getDuration());
 
                         }
                     }).start();

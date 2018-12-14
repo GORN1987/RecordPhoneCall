@@ -6,6 +6,7 @@ import android.os.Build;
 import android.os.Handler;
 import android.os.Looper;
 import android.os.Message;
+import android.util.Log;
 import android.widget.Toast;
 
 import com.guilherme.recordphonecall.DBEntities.Record;
@@ -66,33 +67,31 @@ public class RemoteCalls {
 
         try {
             final ProgressDialog progressDialog;
-
             //Create a new progress dialog
             progressDialog = new ProgressDialog(ctx);
-            //Set the progress dialog to display a horizontal progress bar
-            progressDialog.setProgressStyle(ProgressDialog.STYLE_SPINNER);
-            //Set the dialog title to 'Loading...'
-            progressDialog.setTitle("Loading...");
-            //Set the dialog message to 'Loading application View, please wait...'
-            progressDialog.setMessage("Loading application credentials, please wait...");
-            //This dialog can't be canceled by pressing the back key
-            progressDialog.setCancelable(false);
-            //This dialog isn't indeterminate
-            progressDialog.setIndeterminate(true);
-            //The maximum number of items is 100
-            //progressDialog.setMax(100);
-            //Set the current progress to zero
-            //progressDialog.setProgress(0);
-            //Display the progress dialog
-            progressDialog.show();
+            if (showActivity) {
 
+                //Set the progress dialog to display a horizontal progress bar
+                progressDialog.setProgressStyle(ProgressDialog.STYLE_SPINNER);
+                //Set the dialog title to 'Loading...'
+                progressDialog.setTitle("Loading...");
+                //Set the dialog message to 'Loading application View, please wait...'
+                progressDialog.setMessage("Loading application credentials, please wait...");
+                //This dialog can't be canceled by pressing the back key
+                progressDialog.setCancelable(false);
+                //This dialog isn't indeterminate
+                progressDialog.setIndeterminate(true);
+                //The maximum number of items is 100
+                //progressDialog.setMax(100);
+                //Set the current progress to zero
+                //progressDialog.setProgress(0);
+                //Display the progress dialog
+                progressDialog.show();
+            }
 
 
             entity = new StringEntity(jsonParams2.toString());
 
-            //final Intent waitAct = new Intent(ctx, WaitActivity.class);
-            //waitAct.addFlags(Intent.FLAG_ACTIVITY_NEW_TASK);
-            //startActivity(ctx, waitAct, null);
 
             AsyncHttpClient client = new AsyncHttpClient();
 
@@ -107,10 +106,12 @@ public class RemoteCalls {
 
                     RemoteCalls.ValidUser = false;
 
-                    Intent summary = new Intent(ctx, MainActivity.class);
+                    /*Intent summary = new Intent(ctx, MainActivity.class);
                     summary.addFlags(Intent.FLAG_ACTIVITY_NEW_TASK);
-                    startActivity(ctx, summary, null);
-                    progressDialog.dismiss();
+                    startActivity(ctx, summary, null);*/
+                    if (showActivity) {
+                        progressDialog.dismiss();
+                    }
                 }
 
                 @Override
@@ -141,7 +142,10 @@ public class RemoteCalls {
                     } catch (Throwable throwable) {
                         throwable.printStackTrace();
                     }
-                    progressDialog.dismiss();
+
+                    if (showActivity) {
+                        progressDialog.dismiss();
+                    }
                 }
             });
 
@@ -157,9 +161,15 @@ public class RemoteCalls {
         AsyncHttpClient client = new AsyncHttpClient();
 
         if ((RemoteCalls.Token == "") || (RemoteCalls.Token == null)) {
+
             SyncToken recToken = SyncToken.getLastSyncToken();
+
+            // It verifies if the user is logged, if is not, exit the function
             if (recToken != null) {
                 RemoteCalls.Authenticate(ctx, recToken.USER, recToken.PASSWORD, false);
+            }
+            else {
+                return;
             }
             try {
                 Thread.sleep(5000);
@@ -175,6 +185,8 @@ public class RemoteCalls {
         RequestParams params = new RequestParams();
         try {
             params.put("audio", fileAudio, "audio/mpeg3");
+            params.put("duration", rec.DURATION);
+            params.put("phone", rec.PHONE.toString());
         } catch (FileNotFoundException e) {
             e.printStackTrace();
         }
@@ -189,6 +201,7 @@ public class RemoteCalls {
                     BroadcastObserver obs = BroadcastObserver.getIntance();
                     obs.change();
                 }
+                Log.i("Authentication", responseString);
                 RemoteCalls.showNotification(ctx, (NotificationManager) ctx.getSystemService(NOTIFICATION_SERVICE), "Error on sync audio", "Audio was not sync");
 
                 if (statusCode == 401) {

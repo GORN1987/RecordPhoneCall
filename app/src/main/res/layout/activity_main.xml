@@ -45,6 +45,7 @@
                 android:layout_centerHorizontal="true"
                 android:background="@drawable/edit_style"
                 android:elevation="3dp"
+                android:paddingLeft="10dp"
                 android:gravity="center_vertical"
                 android:hint="Login" />
 
@@ -55,6 +56,7 @@
                 android:layout_below="@id/txtLogin"
                 android:layout_centerHorizontal="true"
                 android:layout_marginTop="25px"
+                android:paddingLeft="10dp"
                 android:background="@drawable/edit_style"
                 android:elevation="3dp"
                 android:gravity="left"
@@ -68,7 +70,7 @@
                 android:layout_below="@id/txtPassword"
                 android:layout_centerHorizontal="true"
                 android:layout_centerVertical="true"
-                android:layout_marginTop="50px"
+                android:layout_marginTop="75px"
                 android:background="@drawable/test_button"
                 android:gravity="center"
                 android:text="Login"

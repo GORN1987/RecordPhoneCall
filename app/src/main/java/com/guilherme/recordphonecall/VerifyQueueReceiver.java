@@ -16,7 +16,7 @@ public class VerifyQueueReceiver extends BroadcastReceiver {
         // an Intent broadcast.
         String resultCode=intent.getStringExtra("informExecution");
         if (resultCode != null ){
-            Toast.makeText(context,resultCode,Toast.LENGTH_SHORT).show();
+
             BroadcastObserver obs = BroadcastObserver.getIntance();
             obs.change();
         }

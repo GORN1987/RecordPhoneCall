@@ -5,6 +5,9 @@ import android.app.AlarmManager;
 import android.app.NotificationManager;
 import android.app.PendingIntent;
 import android.app.ProgressDialog;
+import android.app.job.JobInfo;
+import android.app.job.JobScheduler;
+import android.content.ComponentName;
 import android.content.ContentValues;
 import android.content.Context;
 import android.content.Intent;
@@ -63,12 +66,24 @@ public class MainActivity extends AppCompatActivity  {
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
 
-
         Intent toastIntent= new Intent(getApplicationContext(),InitiateQueue.class);
         PendingIntent toastAlarmIntent = PendingIntent.getBroadcast(getApplicationContext(), 0, toastIntent,PendingIntent.FLAG_UPDATE_CURRENT);
         long startTime=System.currentTimeMillis(); //alarm starts immediately
         AlarmManager backupAlarmMgr=(AlarmManager)this.getSystemService(Context.ALARM_SERVICE);
-        backupAlarmMgr.setInexactRepeating(AlarmManager.RTC_WAKEUP,startTime,5000l,toastAlarmIntent); // alarm will repeat after every 15 minutes
+        //backupAlarmMgr.setInexactRepeating(AlarmManager.RTC_WAKEUP,startTime,5000l,toastAlarmIntent); // alarm will repeat after every 15 minutes*/
+
+        backupAlarmMgr.setAndAllowWhileIdle(AlarmManager.RTC_WAKEUP,new Date().getTime() + 150000, toastAlarmIntent);
+    /*JobScheduler jobScheduler =
+                (JobScheduler) getSystemService(Context.JOB_SCHEDULER_SERVICE);
+        jobScheduler.schedule(new JobInfo.Builder(0,
+                new ComponentName(this ,VerifyQueue.class))
+                .setRequiredNetworkType(JobInfo.NETWORK_TYPE_ANY)
+                .setPersisted(true)
+                .setPeriodic(2000)
+                .setPersisted(true)
+                .setRequiresDeviceIdle(false)
+                .build());*/
+
 
         VerifyQueueReceiver broadcastReceiver = new VerifyQueueReceiver();
         IntentFilter intentFilter= new IntentFilter();
@@ -105,8 +120,6 @@ public class MainActivity extends AppCompatActivity  {
 
                 @Override
                 public void onClick(View view) {
-
-                    //progressDialog.dismiss();
 
                     TextView txtLogin = (TextView) findViewById(R.id.txtLogin);
                     TextView txtPassword = (TextView) findViewById(R.id.txtPassword);
