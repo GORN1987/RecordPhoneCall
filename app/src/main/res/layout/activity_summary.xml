@@ -7,7 +7,6 @@
     tools:context="com.guilherme.recordphonecall.SummaryActivity">
 
 
-
     <include layout="@layout/content_summary" />
 
 

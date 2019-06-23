@@ -14,4 +14,33 @@
     <string name="question_delete_record">Do you want delete this record?</string>
     <string name="file_not_load">Error on load file</string>
     <string name="confirmation">Confirmation?</string>
+    <string name="title_activity_configuration">Configurations</string>
+    <string name="latest_audio">Latest Audio</string>
+    <string name="calls_by_users">Calls by users</string>
+    <!-- TODO: Remove or change this placeholder text -->
+    <string name="hello_blank_fragment">Hello blank fragment</string>
+    <string name="title_activity_notes">Record Note</string>
+    <string name="notes">Notes for this contact</string>
+    <string name="record_saved_succefully">Record saved successfully</string>
+    <string name="sync_to_remote_server">Sync to Remote Server</string>
+    <string name="display_only_once">Display message only once</string>
+    <string name="email_body">Email Body</string>
+    <string name="email_subject">Email Subject</string>
+    <string name="save">Save</string>
+    <string name="sync">Record Sync</string>
+    <string name="wait_sync">Record not Sync</string>
+    <string name="destiny_email">Destiny Emai</string>
+    <string name="smtp_port">Smtp Port</string>
+    <string name="smtp_server">Smtp Server</string>
+    <string name="email_password">Email Password</string>
+    <string name="user_email">User Email</string>
+    <string name="title_activity_analysed_text">Analysed Text</string>
+    <string name="want_logout">Do you want log out?</string>
+    <string name="logout">Log out?</string>
+    <string name="play_audio">Play Audio</string>
+    <string name="delete_audio">Delete Audio</string>
+    <string name="select_action">Select The Action</string>
+    <string name="invalid_user">Invalid User</string>
+    <string name="error_authentication">Error Authentication</string>
+    <string name="phone_could_not_be_gotten">Phone number could not be gotten. Call will not be recorded.</string>
 </resources>

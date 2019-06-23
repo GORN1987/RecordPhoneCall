@@ -6,7 +6,6 @@ import android.database.sqlite.SQLiteDatabase;
 
 import com.guilherme.recordphonecall.DBOpenHelper;
 
-import java.io.File;
 import java.util.Calendar;
 
 /**
@@ -15,24 +14,64 @@ import java.util.Calendar;
 
 public class SyncToken {
 
-    public Integer ID = 0;
-    public Long CREATION_DATE;
-    public String TOKEN;
-    public String USER;
-    public String PASSWORD;
+    public void setId(Integer id) {
+        this.id = id;
+    }
+
+    public void setCreationDate(Long creationDate) {
+        this.creationDate = creationDate;
+    }
+
+    public void setToken(String token) {
+        this.token = token;
+    }
+
+    public void setUser(String user) {
+        this.user = user;
+    }
+
+    public void setPassword(String password) {
+        this.password = password;
+    }
+
+    public Integer getId() {
+        return id;
+    }
+
+    public Long getCreationDate() {
+        return creationDate;
+    }
+
+    public String getToken() {
+        return token;
+    }
+
+    public String getUser() {
+        return user;
+    }
+
+    public String getPassword() {
+        return password;
+    }
+
+    private Integer id = 0;
+    private Long creationDate;
+    private String token;
+    private String user;
+    private String password;
 
     public SyncToken(Integer id)
     {
         SQLiteDatabase db = DBOpenHelper.getDataBase();
-        Cursor records = db.rawQuery("SELECT ID, CREATION_DATE, TOKEN, USER, PASSWORD FROM sync_token WHERE ID = '" + id.toString() +"'", null);
+        Cursor records = db.rawQuery("SELECT id, creation_date, token, user, password FROM sync_token WHERE id = '" + id.toString() +"'", null);
         records.moveToFirst();
 
-        ID = records.getInt(0);
+        this.id = records.getInt(0);
 
-        CREATION_DATE = records.getLong(1);
-        TOKEN = records.getString(2);
-        USER = records.getString(3);
-        PASSWORD = records.getString(4);
+        creationDate = records.getLong(1);
+        token = records.getString(2);
+        user = records.getString(3);
+        password = records.getString(4);
     }
 
     public SyncToken()
@@ -40,7 +79,7 @@ public class SyncToken {
 
     }
 
-    public static void DeleteTokensAndLogOut()
+    public static void deleteTokensAndLogOut()
     {
         SQLiteDatabase db = DBOpenHelper.getDataBase();
         db.delete("sync_token","", null);
@@ -49,16 +88,16 @@ public class SyncToken {
     public static SyncToken getLastSyncToken()
     {
         SQLiteDatabase db = DBOpenHelper.getDataBase();
-        Cursor records = db.rawQuery("SELECT ID, CREATION_DATE, TOKEN, USER, PASSWORD FROM sync_token WHERE CREATION_DATE = (SELECT MAX(CREATION_DATE) FROM sync_token)", null);
+        Cursor records = db.rawQuery("SELECT id, creation_date, token, user, password FROM sync_token WHERE creation_date = (SELECT MAX(creation_date) FROM sync_token)", null);
         records.moveToFirst();
         if (records.getCount() > 0)
         {
             SyncToken recToken = new SyncToken();
-            recToken.CREATION_DATE = records.getLong(1);
-            recToken.TOKEN = records.getString(2);
-            recToken.USER = records.getString(3);
-            recToken.PASSWORD = records.getString(4);
-            recToken.Update();
+            recToken.creationDate = records.getLong(1);
+            recToken.token = records.getString(2);
+            recToken.user = records.getString(3);
+            recToken.password = records.getString(4);
+            recToken.update();
 
             return recToken;
         }
@@ -69,38 +108,38 @@ public class SyncToken {
 
     }
 
-    public void Update()
+    public void update()
     {
 
         SQLiteDatabase db = DBOpenHelper.getDataBase();
 
         ContentValues values = new ContentValues();
 
-        values.put("USER",USER);
-        values.put("PASSWORD",PASSWORD);
+        values.put("user", user);
+        values.put("password", password);
 
-        values.put("CREATION_DATE", Calendar.getInstance().getTimeInMillis());
-        if (ID == 0)
+        values.put("creation_date", Calendar.getInstance().getTimeInMillis());
+        if (id == 0)
         {
 
             db.insert("sync_token","", values);
             Cursor records = db.rawQuery("SELECT MAX(ID) MAX_ID FROM sync_token",null);
 
             records.moveToFirst();
-            ID  = records.getInt(0);
+            id = records.getInt(0);
         }
         else
         {
-            db.update("sync_token",values,"ID = ?", new String[] {ID.toString()});
+            db.update("sync_token",values,"id = ?", new String[] {id.toString()});
         }
 
     }
 
 
-    public void Delete()
+    public void delete()
     {
         SQLiteDatabase db = DBOpenHelper.getDataBase();
-        db.delete("sync_token", "ID = " + ID.toString(), null);
+        db.delete("sync_token", "id = " + id.toString(), null);
 
     }
 

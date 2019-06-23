@@ -5,6 +5,7 @@ import java.util.Date;
 import android.content.BroadcastReceiver;
 import android.content.Context;
 import android.content.Intent;
+import android.database.sqlite.SQLiteDatabase;
 import android.media.MediaRecorder;
 import android.telephony.TelephonyManager;
 
@@ -17,9 +18,14 @@ public abstract class PhonecallReceiver extends BroadcastReceiver {
     private static boolean isIncoming;
     private static String savedNumber;  //because the passed incoming is only valid in ringing
 
-
+// todo Build a snack bar
     @Override
     public void onReceive(Context context, Intent intent) {
+        SQLiteDatabase db = DBOpenHelper.getDataBase();
+        if (db == null)
+        {
+            DBOpenHelper.initDataBase(context);
+        }
 
         //We listen to two intents.  The new outgoing call only tells us of an outgoing call.  We use it to get the number.
         if (intent.getAction().equals("android.intent.action.NEW_OUTGOING_CALL")) {

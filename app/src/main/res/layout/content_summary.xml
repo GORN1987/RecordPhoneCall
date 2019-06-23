@@ -1,65 +1,97 @@
 <?xml version="1.0" encoding="utf-8"?>
 <RelativeLayout xmlns:android="http://schemas.android.com/apk/res/android"
-    android:orientation="vertical"
     xmlns:app="http://schemas.android.com/apk/res-auto"
     xmlns:tools="http://schemas.android.com/tools"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
+    android:orientation="vertical"
     app:layout_behavior="@string/appbar_scrolling_view_behavior"
     tools:context="com.guilherme.recordphonecall.SummaryActivity"
     tools:showIn="@layout/activity_summary">
 
     <android.support.design.widget.AppBarLayout
+        android:id="@+id/toolbar_content"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
         android:background="@color/colorDefault"
         android:gravity="bottom"
-
         android:theme="@style/AppTheme.AppBarOverlay">
 
-        <android.support.v7.widget.Toolbar
-            android:id="@+id/toolbar"
+        <LinearLayout
             android:layout_width="match_parent"
-            android:layout_height="?attr/actionBarSize"
-            app:popupTheme="@style/AppTheme.PopupOverlay" />
+            android:layout_height="wrap_content"
+            android:gravity="center"
+            android:orientation="horizontal">
+
+            <ImageView
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:background="@drawable/ic_local_phone_black_24dp"
+                />
+
+            <android.support.v7.widget.Toolbar
+                android:id="@+id/toolbar"
+                android:layout_width="match_parent"
+                android:layout_height="?attr/actionBarSize"
+                app:popupTheme="@style/AppTheme.PopupOverlay" />
+        </LinearLayout>
+        <android.support.design.widget.TabLayout
+            android:id="@+id/tabs"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content">
+
+            <android.support.design.widget.TabItem
+                android:id="@+id/tbSync"
+                android:layout_width="10dp"
+                android:layout_height="10dp"
+                android:tag="sync"
+                android:text="@string/latest_audio" />
+
+            <android.support.design.widget.TabItem
+                android:id="@+id/tbAsync"
+                android:layout_width="10dp"
+                android:layout_height="10dp"
+                android:text="@string/calls_by_users" />
+
+
+        </android.support.design.widget.TabLayout>
+
 
     </android.support.design.widget.AppBarLayout>
 
 
     <ListView
+        android:id="@+id/lstAudioRecord"
         android:layout_width="match_parent"
         android:layout_height="match_parent"
+        android:layout_below="@+id/toolbar_content"
         android:layout_centerInParent="true"
-        android:layout_marginTop="7dp"
-        android:id="@+id/lstAudioRecord"
-        android:divider="@color/colorGrey"
-        android:dividerHeight="2px"
-        android:layout_above="@+id/bottom_navigation"
-        ></ListView>
-<LinearLayout
-    android:layout_width="match_parent"
-    android:layout_height="0dp"
-    android:layout_alignParentBottom="true"
-    android:layout_marginTop="5dp"
-    android:elevation="5dp"
-    android:background="@color/colorDefault"
-    android:orientation="horizontal"
-    android:id="@+id/painel_navigation">
-    <Button
-        android:layout_width="50dp"
-        android:layout_height="50dp"
-        android:id="@+id/btnControlAudio"
-        android:background="@drawable/ic_pause_black_24dp"/>
-<SeekBar
-    android:layout_width="match_parent"
-    android:layout_height="wrap_content"
-    android:progressTint="@color/colorWhite"
-    android:thumbTint="@color/colorWhite"
-    android:layout_gravity="center"
-    android:progressBackgroundTint="@color/colorWhite"
-    android:id="@+id/seekBarAudio"/>
+        android:dividerHeight="2px"></ListView>
 
+    <LinearLayout
+        android:id="@+id/painel_navigation"
+        android:layout_width="match_parent"
+        android:layout_height="0dp"
+        android:layout_alignParentBottom="true"
+        android:layout_marginTop="5dp"
+        android:background="@color/colorDefault"
+        android:elevation="5dp"
+        android:orientation="horizontal">
 
+        <Button
+            android:id="@+id/btnControlAudio"
+            android:layout_width="50dp"
+            android:layout_height="50dp"
+            android:background="@drawable/ic_pause_black_24dp" />
+
+        <SeekBar
+            android:id="@+id/seekBarAudio"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_gravity="center"
+            android:progressBackgroundTint="@color/colorWhite"
+            android:progressTint="@color/colorWhite"
+            android:thumbTint="@color/colorWhite" />
 
     </LinearLayout>
 

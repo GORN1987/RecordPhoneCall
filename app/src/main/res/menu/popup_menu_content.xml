@@ -9,4 +9,8 @@
             android:id="@+id/menuPlayAudio"
             android:title="Play Audio" />
 
+        <item
+            android:id="@+id/menuTranscriptAudio"
+            android:title="Check transcripted audio" />
+
 </menu>

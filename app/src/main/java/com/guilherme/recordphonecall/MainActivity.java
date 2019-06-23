@@ -2,61 +2,35 @@ package com.guilherme.recordphonecall;
 
 import android.Manifest;
 import android.app.AlarmManager;
-import android.app.NotificationManager;
 import android.app.PendingIntent;
-import android.app.ProgressDialog;
-import android.app.job.JobInfo;
-import android.app.job.JobScheduler;
-import android.content.ComponentName;
-import android.content.ContentValues;
 import android.content.Context;
 import android.content.Intent;
 import android.content.IntentFilter;
-import android.database.sqlite.SQLiteDatabase;
-import android.icu.util.DateInterval;
-import android.media.AudioFormat;
-import android.media.AudioRecord;
-import android.os.Environment;
+import android.graphics.Paint;
+import android.net.Uri;
+import android.os.SystemClock;
 import android.support.v4.app.ActivityCompat;
 import android.support.v7.app.AppCompatActivity;
 import android.os.Bundle;
-import android.media.MediaPlayer;
-import android.media.MediaRecorder;
 import android.support.v7.widget.Toolbar;
-import android.text.format.DateUtils;
-import android.util.Log;
 import android.view.View;
 import android.widget.Button;
 import android.widget.TextView;
-import android.widget.Toast;
 
-import com.guilherme.recordphonecall.DBEntities.QueueControll;
-import com.guilherme.recordphonecall.DBEntities.Record;
+import com.guilherme.recordphonecall.DBEntities.AppConfiguration;
 import com.guilherme.recordphonecall.DBEntities.SyncToken;
 import com.loopj.android.http.*;
 
-import org.json.JSONException;
-import org.json.JSONObject;
 
-import java.io.File;
-import java.io.FileNotFoundException;
-import java.io.FileOutputStream;
-import java.io.IOException;
-import java.io.UnsupportedEncodingException;
-import java.util.Calendar;
-import java.util.Date;
-import java.util.Observable;
-import java.util.Observer;
-import java.util.concurrent.TimeUnit;
-
-import cz.msebera.android.httpclient.Header;
-import cz.msebera.android.httpclient.entity.StringEntity;
-
-
-public class MainActivity extends AppCompatActivity  {
+public class MainActivity extends AppCompatActivity {
 
     private String[] permissions = {android.Manifest.permission.RECORD_AUDIO,
             android.Manifest.permission.WRITE_EXTERNAL_STORAGE,
+            android.Manifest.permission.READ_PHONE_STATE,
+            Manifest.permission.RECORD_AUDIO,
+            Manifest.permission.PROCESS_OUTGOING_CALLS,
+            Manifest.permission.READ_CONTACTS,
+            Manifest.permission.CAPTURE_AUDIO_OUTPUT,
             Manifest.permission.INTERNET};
 
 
@@ -66,55 +40,53 @@ public class MainActivity extends AppCompatActivity  {
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
 
-        Intent toastIntent= new Intent(getApplicationContext(),InitiateQueue.class);
-        PendingIntent toastAlarmIntent = PendingIntent.getBroadcast(getApplicationContext(), 0, toastIntent,PendingIntent.FLAG_UPDATE_CURRENT);
-        long startTime=System.currentTimeMillis(); //alarm starts immediately
-        AlarmManager backupAlarmMgr=(AlarmManager)this.getSystemService(Context.ALARM_SERVICE);
-        //backupAlarmMgr.setInexactRepeating(AlarmManager.RTC_WAKEUP,startTime,5000l,toastAlarmIntent); // alarm will repeat after every 15 minutes*/
+        Intent toastIntent = new Intent(getApplicationContext(), InitiateQueue.class);
+        PendingIntent toastAlarmIntent = PendingIntent.getBroadcast(getApplicationContext(), 0, toastIntent, PendingIntent.FLAG_UPDATE_CURRENT);
 
-        backupAlarmMgr.setAndAllowWhileIdle(AlarmManager.RTC_WAKEUP,new Date().getTime() + 150000, toastAlarmIntent);
-    /*JobScheduler jobScheduler =
-                (JobScheduler) getSystemService(Context.JOB_SCHEDULER_SERVICE);
-        jobScheduler.schedule(new JobInfo.Builder(0,
-                new ComponentName(this ,VerifyQueue.class))
-                .setRequiredNetworkType(JobInfo.NETWORK_TYPE_ANY)
-                .setPersisted(true)
-                .setPeriodic(2000)
-                .setPersisted(true)
-                .setRequiresDeviceIdle(false)
-                .build());*/
+        AlarmManager backupAlarmMgr = (AlarmManager) this.getSystemService(Context.ALARM_SERVICE);
 
+        backupAlarmMgr.setExactAndAllowWhileIdle(AlarmManager.ELAPSED_REALTIME_WAKEUP, SystemClock.elapsedRealtime() + 5000, toastAlarmIntent);
 
         VerifyQueueReceiver broadcastReceiver = new VerifyQueueReceiver();
-        IntentFilter intentFilter= new IntentFilter();
+        IntentFilter intentFilter = new IntentFilter();
         intentFilter.addAction("com.guilherme.recordphonecall.VerifyQueueReceiver");
-        registerReceiver(broadcastReceiver,intentFilter);
+        registerReceiver(broadcastReceiver, intentFilter);
 
         DBOpenHelper.initDataBase(getApplicationContext());
+        ActivityCompat.requestPermissions(this,
+                permissions,
+                123);
 
-        SyncToken recToken = SyncToken.getLastSyncToken();
-        if ((recToken != null) && (RemoteCalls.ValidUser))
+        setContentView(R.layout.activity_main);
+
+        Toolbar toolbar = (Toolbar) findViewById(R.id.toolbar2);
+        setSupportActionBar(toolbar);
+
+
+        TextView txtLink =  (TextView)findViewById(R.id.txtLink);
+        txtLink.setPaintFlags(txtLink.getPaintFlags() |   Paint.UNDERLINE_TEXT_FLAG);
+
+        txtLink.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View view) {
+
+                Uri url = Uri.parse("https://advisor-speach.herokuapp.com/users/new");
+                Intent urlAddNewUser = new Intent(Intent.ACTION_VIEW, url);
+                startActivity(urlAddNewUser);
+            }
+
+        });
+
+        SyncToken recToken;
+        AppConfiguration appConf =  new AppConfiguration();
+        if (appConf.getSyncWithServer())
         {
-            RemoteCalls.Authenticate(this,recToken.USER,recToken.PASSWORD,true);
-        }
-        else
-        {
-            Intent serviceIntent = new Intent(this, QueueControll.class);
-            startService(serviceIntent);
+            recToken = SyncToken.getLastSyncToken();
 
-            ActivityCompat.requestPermissions(this,
-                    permissions,
-                    123);
-
-
-            setContentView(R.layout.activity_main);
-
-
-
-            Toolbar toolbar = (Toolbar) findViewById(R.id.toolbar2);
-            setSupportActionBar(toolbar);
-
-            final Button btnLogin = (Button)findViewById(R.id.btnLogin);
+            if ((recToken != null) && (RemoteCalls.ValidUser)) {
+                RemoteCalls.authenticate(this, recToken.getUser(), recToken.getPassword(), true);
+            }
+            final Button btnLogin = (Button) findViewById(R.id.btnLogin);
             btnLogin.setOnClickListener(new View.OnClickListener() {
 
 
@@ -123,13 +95,19 @@ public class MainActivity extends AppCompatActivity  {
 
                     TextView txtLogin = (TextView) findViewById(R.id.txtLogin);
                     TextView txtPassword = (TextView) findViewById(R.id.txtPassword);
-                    RemoteCalls.Authenticate(MainActivity.this,txtLogin.getText().toString(), txtPassword.getText().toString(), true);
-
-
+                    RemoteCalls.authenticate(MainActivity.this, txtLogin.getText().toString(), txtPassword.getText().toString(), true);
                 }
+
+
             });
         }
+        else
+        {
+            Intent summary = new Intent(this, SummaryActivity.class);
+            summary.addFlags(Intent.FLAG_ACTIVITY_NEW_TASK);
+            startActivity( summary, null);
 
+        }
 
 
     }
